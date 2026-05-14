@@ -1,3 +1,5 @@
-NMDC HSE Dashboard - Supabase Login Version
+# HSE Programs, Initiatives & Innovation
 
-Upload index.html to GitHub and commit changes.
+Updated platform based on Sr. HSE Officer – Programs, Initiatives & Innovation 2026 goals.
+
+Upload index.html to the existing GitHub repository and commit. Vercel will update the same link.
