@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NMDC HSE Executive Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --deep:#0D2638;
+      --blue:#0082C2;
+      --teal:#00A7A7;
+      --bg:#F4F7FA;
+      --card:#FFFFFF;
+      --text:#17212B;
+      --muted:#64748B;
+      --red:#B91C1C;
+      --amber:#B45309;
+      --green:#047857;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+    aside{background:var(--deep);color:white;padding:24px;position:sticky;top:0;height:100vh}
+    .brand{border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:18px;margin-bottom:24px;background:rgba(255,255,255,.05)}
+    .brand h1{font-size:28px;margin:0;font-weight:900;letter-spacing:.5px}
+    .brand p{margin:8px 0 0;color:#A8DFF0;font-size:13px}
+    .nav button{width:100%;text-align:left;background:transparent;border:0;color:white;padding:13px 14px;border-radius:12px;margin:4px 0;font-size:15px;cursor:pointer}
+    .nav button.active,.nav button:hover{background:linear-gradient(90deg,var(--blue),rgba(0,167,167,.6))}
+    main{padding:24px 32px}
+    .hero{background:linear-gradient(90deg,var(--deep),var(--blue));border-radius:22px;color:white;padding:26px 30px;margin-bottom:22px;box-shadow:0 8px 28px rgba(13,38,56,.12)}
+    .hero h2{font-size:30px;margin:0 0 8px;font-weight:900}
+    .hero p{margin:0;color:#E4F8FF}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px}
+    .card{background:var(--card);border-radius:18px;padding:20px;box-shadow:0 4px 18px rgba(13,38,56,.08);border-left:7px solid var(--blue)}
+    .card .label{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .card .value{font-size:32px;font-weight:900;color:var(--deep)}
+    .card .note{font-size:12px;color:var(--muted);margin-top:6px}
+    .panel{background:white;border-radius:18px;padding:22px;margin-bottom:20px;box-shadow:0 4px 18px rgba(13,38,56,.08)}
+    .panel h3{margin:0 0 16px;color:var(--deep);font-size:20px}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:12px;border-bottom:1px solid #E5EAF0;text-align:left;vertical-align:top}
+    th{background:#F8FAFC;color:var(--deep);font-size:13px}
+    .badge{padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800;display:inline-block}
+    .high{background:#FEE2E2;color:var(--red)}
+    .medium{background:#FEF3C7;color:var(--amber)}
+    .low{background:#DCFCE7;color:var(--green)}
+    .status{background:#E0F2FE;color:#075985}
+    .hidden{display:none}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .btn{background:var(--blue);color:white;border:none;padding:11px 15px;border-radius:12px;cursor:pointer;font-weight:800}
+    .btn.secondary{background:var(--deep)}
+    input,select,textarea{width:100%;padding:11px;border:1px solid #CBD5E1;border-radius:10px;background:white}
+    .form-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px}
+    @media(max-width:1000px){
+      .app{grid-template-columns:1fr}
+      aside{position:relative;height:auto}
+      .grid,.two,.form-grid{grid-template-columns:1fr}
+      main{padding:16px}
+    }
+    @media print{
+      aside,.actions,.no-print{display:none!important}
+      .app{display:block}
+      body{background:white}
+      .panel,.card,.hero{box-shadow:none}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <h1>NMDC</h1>
+      <p>HSE Executive Dashboard</p>
+    </div>
+    <div class="nav">
+      <button class="active" onclick="showPage('overview', this)">Executive Overview</button>
+      <button onclick="showPage('kpi', this)">HSE KPI Dashboard</button>
+      <button onclick="showPage('campaigns', this)">Campaign Roadmap</button>
+      <button onclick="showPage('actions', this)">Pending Actions</button>
+      <button onclick="showPage('innovation', this)">Innovation & AI</button>
+      <button onclick="showPage('reports', this)">Executive Report</button>
+    </div>
+  </aside>
+
+  <main>
+    <section class="hero">
+      <h2>NMDC HSE Executive Dashboard</h2>
+      <p>ANCHOR 26 | HSE Campaigns | AI Innovation | Executive Control</p>
+    </section>
+
+    <section id="overview" class="page">
+      <div class="grid">
+        <div class="card"><div class="label">LTIFR</div><div class="value">0.00</div><div class="note">Target maintained</div></div>
+        <div class="card"><div class="label">PTW Compliance</div><div class="value">96%</div><div class="note">Above target</div></div>
+        <div class="card"><div class="label">Pending Actions</div><div class="value" id="pendingCount">10</div><div class="note">Executive follow-up</div></div>
+        <div class="card"><div class="label">AI Initiatives</div><div class="value">6</div><div class="note">Innovation roadmap</div></div>
+      </div>
+      <div class="two">
+        <div class="panel"><h3>KPI Current vs Target</h3><canvas id="kpiChart"></canvas></div>
+        <div class="panel"><h3>Actions by Priority</h3><canvas id="priorityChart"></canvas></div>
+      </div>
+      <div class="panel"><h3>Top Executive Focus</h3><table id="focusTable"></table></div>
+    </section>
+
+    <section id="kpi" class="page hidden">
+      <div class="panel">
+        <h3>HSE KPI Dashboard</h3>
+        <div class="actions">
+          <button class="btn" onclick="exportCSV(kpis,'hse_kpis.csv')">Export KPI CSV</button>
+          <button class="btn secondary" onclick="window.print()">Print / Save PDF</button>
+        </div>
+        <table id="kpiTable"></table>
+      </div>
+    </section>
+
+    <section id="campaigns" class="page hidden">
+      <div class="panel">
+        <h3>HSE Campaign Roadmap 2026</h3>
+        <table id="campaignTable"></table>
+      </div>
+    </section>
+
+    <section id="actions" class="page hidden">
+      <div class="grid">
+        <div class="card"><div class="label">High Priority</div><div class="value" id="highCount">0</div><div class="note">Immediate attention</div></div>
+        <div class="card"><div class="label">Medium Priority</div><div class="value" id="mediumCount">0</div><div class="note">Weekly control</div></div>
+        <div class="card"><div class="label">Low Priority</div><div class="value" id="lowCount">0</div><div class="note">Track as planned</div></div>
+        <div class="card"><div class="label">Total Actions</div><div class="value" id="totalCount">0</div><div class="note">Current list</div></div>
+      </div>
+      <div class="panel">
+        <h3>Add / Track Action</h3>
+        <div class="form-grid">
+          <input id="newAction" placeholder="Action title">
+          <input id="newOwner" placeholder="Owner">
+          <select id="newPriority"><option>High</option><option>Medium</option><option>Low</option></select>
+          <button class="btn" onclick="addAction()">Add Action</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Pending Actions Tracker</h3>
+        <div class="actions">
+          <button class="btn" onclick="exportCSV(actions,'pending_actions.csv')">Export Actions CSV</button>
+          <button class="btn secondary" onclick="clearLocal()">Reset Demo Data</button>
+        </div>
+        <table id="actionsTable"></table>
+      </div>
+    </section>
+
+    <section id="innovation" class="page hidden">
+      <div class="panel">
+        <h3>Innovation & AI Projects</h3>
+        <table id="innovationTable"></table>
+      </div>
+      <div class="panel"><h3>Innovation Pipeline</h3><canvas id="innovationChart"></canvas></div>
+    </section>
+
+    <section id="reports" class="page hidden">
+      <div class="panel">
+        <h3>Executive Report Generator</h3>
+        <textarea id="summary" rows="7">Overall HSE performance remains controlled. Key focus is closure of high-priority actions, campaign execution, and acceleration of AI-enabled HSE initiatives.</textarea>
+        <br><br>
+        <div class="actions">
+          <button class="btn" onclick="downloadReport()">Download Executive Report</button>
+          <button class="btn secondary" onclick="window.print()">Print / Save PDF</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const kpis = [
+  {KPI:"LTIFR", Current:0.00, Target:0.00, Unit:"Rate"},
+  {KPI:"TRIR", Current:0.12, Target:0.20, Unit:"Rate"},
+  {KPI:"BSA Closure", Current:91, Target:95, Unit:"%"},
+  {KPI:"PTW Audit Compliance", Current:96, Target:95, Unit:"%"},
+  {KPI:"Training Compliance", Current:94, Target:95, Unit:"%"},
+  {KPI:"Observations Closed", Current:88, Target:90, Unit:"%"}
+];
+
+const campaigns = [
+  {Quarter:"Q1 2026", Campaign:"Road Safety", Anchor:"Assess the Risk", Status:"Planned"},
+  {Quarter:"Q1 2026", Campaign:"Hand & Finger Safety", Anchor:"Control the Operation", Status:"Submitted for Review"},
+  {Quarter:"Q2 2026", Campaign:"Heat Stress", Anchor:"Respect Life & Environment", Status:"Submitted for Review"},
+  {Quarter:"Q2 2026", Campaign:"LSR Focus", Anchor:"No Shortcuts", Status:"Planned"},
+  {Quarter:"Q3 2026", Campaign:"Lifting Operations", Anchor:"Control the Operation", Status:"Planned"},
+  {Quarter:"Q3 2026", Campaign:"Stop Work Authority", Anchor:"Hold the Line", Status:"Planned"},
+  {Quarter:"Q4 2026", Campaign:"Environmental Awareness", Anchor:"Respect Life & Environment", Status:"Planned"},
+  {Quarter:"Q4 2026", Campaign:"Waste Management", Anchor:"Own Safety", Status:"Planned"}
+];
+
+let actions = JSON.parse(localStorage.getItem("nmdc_actions") || "null") || [
+  {Action:"Road Safety Campaign Publication", Owner:"HSE Comms", Priority:"High", Status:"Pending", Target:"2026-02-20"},
+  {Action:"LSR Campaign Execution", Owner:"Projects HSE", Priority:"High", Status:"Pending", Target:"2026-02-28"},
+  {Action:"LCD Screen Content Publication", Owner:"HSE Comms", Priority:"Medium", Status:"Pending", Target:"2026-02-18"},
+  {Action:"Audit and Sustainability Publication", Owner:"Audit Team", Priority:"Medium", Status:"Pending", Target:"2026-03-05"},
+  {Action:"Reporting Dashboard Agent", Owner:"Mahmoud", Priority:"High", Status:"In Progress", Target:"2026-02-25"},
+  {Action:"Environment AI Agent coordination", Owner:"Env/IT/HSE", Priority:"High", Status:"Pending", Target:"2026-02-26"},
+  {Action:"Heat Stress Campaign submitted for review", Owner:"Mahmoud", Priority:"Medium", Status:"Submitted for Review", Target:"2026-05-13"},
+  {Action:"Hand & Finger Campaign submitted for review", Owner:"Mahmoud", Priority:"Medium", Status:"Submitted for Review", Target:"2026-05-13"}
+];
+
+const innovations = [
+  {Initiative:"Blind Spot Detection", Scope:"MHE / equipment", Stage:"Implementation planning", Risk:"Medium"},
+  {Initiative:"Connected Workers", Scope:"Comms, gas detection, GPS", Stage:"Concept / vendor review", Risk:"Medium"},
+  {Initiative:"AI Cameras", Scope:"Workshop unsafe act detection", Stage:"Vendor proposal review", Risk:"High"},
+  {Initiative:"HSE AI Hub", Scope:"Multiple HSE AI agents", Stage:"Roadmap", Risk:"Medium"},
+  {Initiative:"Reporting Dashboard Agent", Scope:"Executive reporting automation", Stage:"In development", Risk:"High"},
+  {Initiative:"Environment AI Agent", Scope:"Environmental compliance support", Stage:"Coordination pending", Risk:"Medium"}
+];
+
+function showPage(id, btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+function badge(value){
+  let cls = value==="High" ? "high" : value==="Medium" ? "medium" : value==="Low" ? "low" : "status";
+  return `<span class="badge ${cls}">${value}</span>`;
+}
+
+function renderTable(id, rows){
+  if(!rows.length){document.getElementById(id).innerHTML="";return}
+  const cols = Object.keys(rows[0]);
+  let html = "<thead><tr>" + cols.map(c=>`<th>${c}</th>`).join("") + "</tr></thead><tbody>";
+  html += rows.map(r=>"<tr>"+cols.map(c=>{
+    let v = r[c];
+    if(c==="Priority" || c==="Status" || c==="Risk") return `<td>${badge(v)}</td>`;
+    return `<td>${v}</td>`;
+  }).join("")+"</tr>").join("");
+  html += "</tbody>";
+  document.getElementById(id).innerHTML = html;
+}
+
+function updateCounts(){
+  document.getElementById("pendingCount").innerText = actions.filter(a=>["Pending","In Progress"].includes(a.Status)).length;
+  document.getElementById("highCount").innerText = actions.filter(a=>a.Priority==="High").length;
+  document.getElementById("mediumCount").innerText = actions.filter(a=>a.Priority==="Medium").length;
+  document.getElementById("lowCount").innerText = actions.filter(a=>a.Priority==="Low").length;
+  document.getElementById("totalCount").innerText = actions.length;
+}
+
+function addAction(){
+  const a = document.getElementById("newAction").value.trim();
+  const o = document.getElementById("newOwner").value.trim();
+  const p = document.getElementById("newPriority").value;
+  if(!a) return alert("Add action title.");
+  actions.push({Action:a, Owner:o||"TBC", Priority:p, Status:"Pending", Target:"TBC"});
+  localStorage.setItem("nmdc_actions", JSON.stringify(actions));
+  renderAll();
+  document.getElementById("newAction").value="";
+  document.getElementById("newOwner").value="";
+}
+
+function clearLocal(){
+  localStorage.removeItem("nmdc_actions");
+  location.reload();
+}
+
+function exportCSV(rows, filename){
+  const cols = Object.keys(rows[0]);
+  const csv = [cols.join(",")].concat(rows.map(r=>cols.map(c=>`"${String(r[c]).replaceAll('"','""')}"`).join(","))).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadReport(){
+  const text = `NMDC HSE Executive Dashboard Report
+Date: ${new Date().toLocaleDateString()}
+
+${document.getElementById("summary").value}
+
+LTIFR: 0.00
+PTW Compliance: 96%
+Pending Actions: ${actions.length}
+AI Initiatives: ${innovations.length}
+`;
+  const blob = new Blob([text], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url; a.download="NMDC_HSE_Executive_Report.txt"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+let chartsDone=false;
+function renderCharts(){
+  if(chartsDone) return;
+  new Chart(document.getElementById("kpiChart"), {
+    type:"bar",
+    data:{labels:kpis.map(x=>x.KPI), datasets:[
+      {label:"Current", data:kpis.map(x=>x.Current), backgroundColor:"#0082C2"},
+      {label:"Target", data:kpis.map(x=>x.Target), backgroundColor:"#0D2638"}
+    ]},
+    options:{responsive:true, plugins:{legend:{position:"bottom"}}}
+  });
+  new Chart(document.getElementById("priorityChart"), {
+    type:"doughnut",
+    data:{labels:["High","Medium","Low"], datasets:[{data:[
+      actions.filter(a=>a.Priority==="High").length,
+      actions.filter(a=>a.Priority==="Medium").length,
+      actions.filter(a=>a.Priority==="Low").length
+    ], backgroundColor:["#B91C1C","#B45309","#047857"]}]},
+    options:{responsive:true, plugins:{legend:{position:"bottom"}}}
+  });
+  new Chart(document.getElementById("innovationChart"), {
+    type:"bar",
+    data:{labels:innovations.map(x=>x.Initiative), datasets:[{label:"Risk Index", data:innovations.map(x=>x.Risk==="High"?3:2), backgroundColor:"#0082C2"}]},
+    options:{responsive:true, plugins:{legend:{display:false}}}
+  });
+  chartsDone=true;
+}
+
+function renderAll(){
+  renderTable("kpiTable", kpis);
+  renderTable("campaignTable", campaigns);
+  renderTable("actionsTable", actions);
+  renderTable("innovationTable", innovations);
+  renderTable("focusTable", actions.filter(a=>a.Priority==="High"));
+  updateCounts();
+  renderCharts();
+}
+renderAll();
+</script>
+</body>
+</html>
