@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HSE Programs, Initiatives & Innovation</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --deep:#061A2B;--navy:#08263B;--blue:#0082C2;--sky:#20B7EF;--teal:#00A7A7;
+  --bg:#F4F8FB;--card:#fff;--text:#102033;--muted:#64748B;--line:#E2E8F0;
+  --red:#B91C1C;--amber:#B45309;--green:#047857;--purple:#5B21B6;
+}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.hidden{display:none!important}.app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+aside{background:linear-gradient(180deg,#020B14,#061A2B 55%,#004D7A);color:white;padding:22px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{font-size:18px;font-weight:900;line-height:1.25;margin:14px 0 24px}.brand small{display:block;color:#BFEFFF;font-size:12px;margin-top:6px}
+.nav button{width:100%;text-align:left;background:transparent;border:0;color:white;padding:12px 14px;border-radius:12px;margin:4px 0;font-size:14px;cursor:pointer;font-weight:800}
+.nav button.active,.nav button:hover{background:linear-gradient(90deg,var(--blue),rgba(0,167,167,.65))}.side-box{margin-top:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:14px;font-size:12px;color:#D7F3FF}
+main{padding:24px 32px}.hero{background:linear-gradient(100deg,var(--deep),var(--blue),#25B7EE);border-radius:26px;color:white;padding:28px 30px;margin-bottom:22px;box-shadow:0 10px 32px rgba(13,38,56,.16);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;right:-120px;top:-160px;width:420px;height:420px;background:rgba(255,255,255,.18);border-radius:50%}.hero h1{font-size:34px;margin:0 0 8px;font-weight:900}.hero p{margin:0;color:#E4F8FF}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px}.card{background:white;border-radius:18px;padding:20px;box-shadow:0 4px 18px rgba(13,38,56,.08);border-left:7px solid var(--blue)}.card .label{font-size:13px;color:var(--muted);margin-bottom:8px}.card .value{font-size:31px;font-weight:900;color:var(--deep)}.card .note{font-size:12px;color:var(--muted);margin-top:6px}
+.panel{background:white;border-radius:18px;padding:22px;margin-bottom:20px;box-shadow:0 4px 18px rgba(13,38,56,.08)}.panel h2,.panel h3{margin:0 0 16px;color:var(--deep)}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.tabs button{border:1px solid #CDE5F4;background:#fff;color:var(--deep);font-weight:900;padding:10px 14px;border-radius:12px;cursor:pointer}.tabs button.active{background:linear-gradient(90deg,var(--blue),var(--sky));color:white;border-color:transparent}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.form-grid.two{grid-template-columns:repeat(2,1fr)}.form-grid.three{grid-template-columns:repeat(3,1fr)}
+input,select,textarea{width:100%;padding:12px 13px;border:1px solid #CBD5E1;border-radius:12px;background:white;font-size:14px}textarea{min-height:80px}.btn{background:linear-gradient(90deg,var(--blue),var(--sky));color:white;border:none;padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:900}.btn.red{background:var(--red)}.btn.gray{background:#475569}.btn.green{background:var(--green)}.btn.small{padding:8px 10px;font-size:12px}.btn:disabled{opacity:.5;cursor:not-allowed}
+table{width:100%;border-collapse:collapse;font-size:14px;background:white}th,td{padding:11px;border-bottom:1px solid #E5EAF0;text-align:left;vertical-align:top}th{background:#F8FAFC;color:var(--deep);font-size:13px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}.badge{padding:5px 9px;border-radius:999px;font-size:12px;font-weight:900;display:inline-block}.high{background:#FEE2E2;color:var(--red)}.medium{background:#FEF3C7;color:var(--amber)}.low{background:#DCFCE7;color:var(--green)}.status{background:#E0F2FE;color:#075985}.done{background:#DCFCE7;color:var(--green)}.pending{background:#FEF3C7;color:var(--amber)}.hold{background:#FEE2E2;color:var(--red)}
+.progress{height:11px;background:#E5EAF0;border-radius:999px;overflow:hidden;min-width:100px}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:999px}.actions{display:flex;gap:8px;flex-wrap:wrap}.muted{color:var(--muted);font-size:13px}.section{display:none}.section.active{display:block}.goal-chip{font-weight:900;color:var(--blue)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}.modal.show{display:flex}.modal-box{background:white;border-radius:20px;max-width:900px;width:100%;max-height:90vh;overflow:auto;padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.x{background:#E2E8F0;border:0;border-radius:10px;padding:8px 12px;font-weight:900;cursor:pointer}
+@media(max-width:1100px){.app{grid-template-columns:1fr}aside{position:relative;height:auto}.grid,.form-grid,.form-grid.two,.form-grid.three{grid-template-columns:1fr}main{padding:16px}.hero h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="brand">NMDC D&M HSE<br>Programs, Initiatives & Innovation<small>Full Admin Control Center</small></div>
+  <div class="nav" id="nav"></div>
+  <div class="side-box">Controls included: Add, Edit, Delete, Upload Evidence, Refresh Database, Export CSV, and Goal-by-Goal management.</div>
+</aside>
+<main>
+  <div class="hero"><h1>HSE Programs, Initiatives & Innovation</h1><p>Senior HSE Officer Control Center | 2026 Goals | Digital Programs | Executive Governance</p></div>
+  <div id="content"></div>
+</main>
+</div>
+
+<div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><h3 id="modalTitle">Edit</h3><button class="x" onclick="closeModal()">Close</button></div><div id="modalBody"></div></div></div>
+
+<script>
+const SUPABASE_URL = 'https://vmmokdlxfxemjcdqmuer.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_tWzA0aEt90Fd0kEj8IG6Rg_r-qgbYNM';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TABLES = {
+  goals:'HSE Goals 2026', details:'HSE Goals Details', evidence:'HSE Evidence Library', actions:'HSE Executive Actions'
+};
+const goalNames = {
+  1:'Lead High-Profile Leadership Tours and Behavioral Safety Programs',
+  2:'Drive HSE Campaigns, Initiatives and Recognition',
+  3:'Lead HSE Innovation and Digital Program',
+  4:'Develop and Track HSE Improvement Actions',
+  5:'Support HSE Competency Development and Awareness',
+  6:'Develop and Implement HSE Programs and Procedures'
+};
+const state = {goals:[], details:[], evidence:[], actions:[], active:'dashboard'};
+
+const sections = [
+  ['dashboard','Dashboard'],['g1','G1 Leadership Tours'],['g2','G2 Campaigns'],['g3','G3 Innovation'],['g4','G4 Improvements'],['g5','G5 Competency'],['g6','G6 Programs'],['actions','Executive Actions'],['evidence','Evidence Library'],['report','Executive Report']
+];
+
+function esc(v){return String(v ?? '').replace(/[&<>'"]/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[s]));}
+function val(id){return document.getElementById(id)?.value?.trim() || ''}
+function badge(v){let c=String(v||'').toLowerCase();let cls=c.includes('complete')||c.includes('done')?'done':c.includes('pending')?'pending':c.includes('hold')?'hold':c.includes('medium')?'medium':c.includes('low')?'low':c.includes('high')?'high':'status';return `<span class="badge ${cls}">${esc(v||'Pending')}</span>`}
+function progress(v){let n=Math.max(0,Math.min(100,Number(v||0)));return `<div class="progress"><span style="width:${n}%"></span></div><div class="muted">${n}%</div>`}
+function tableName(t){return TABLES[t]}
+
+async function loadAll(){
+  const [goals,details,evidence,actions] = await Promise.all([
+    db.from(TABLES.goals).select('*').order('goal_no',{ascending:true}),
+    db.from(TABLES.details).select('*').order('goal_no',{ascending:true}),
+    db.from(TABLES.evidence).select('*').order('id',{ascending:false}),
+    db.from(TABLES.actions).select('*').order('id',{ascending:false})
+  ]);
+  state.goals = goals.data || []; state.details = details.data || []; state.evidence = evidence.data || []; state.actions = actions.data || [];
+  render();
+}
+
+function initNav(){document.getElementById('nav').innerHTML = sections.map(s=>`<button onclick="show('${s[0]}')" id="nav_${s[0]}">${s[1]}</button>`).join('')}
+function show(id){state.active=id;render()}
+function render(){
+  sections.forEach(s=>document.getElementById('nav_'+s[0])?.classList.toggle('active',state.active===s[0]));
+  const c=document.getElementById('content');
+  if(state.active==='dashboard') c.innerHTML=dashboardHTML();
+  else if(state.active.startsWith('g')) c.innerHTML=goalHTML(Number(state.active.slice(1)));
+  else if(state.active==='actions') c.innerHTML=actionsHTML();
+  else if(state.active==='evidence') c.innerHTML=evidenceHTML();
+  else c.innerHTML=reportHTML();
+  setTimeout(drawCharts,50);
+}
+
+function dashboardHTML(){
+  const high=state.actions.filter(a=>String(a.priority).toLowerCase()==='high').length;
+  const pending=[...state.actions,...state.details].filter(a=>String(a.status||'').toLowerCase().includes('pending')).length;
+  const completed=[...state.actions,...state.details].filter(a=>String(a.status||'').toLowerCase().includes('complete')).length;
+  return `<div class="grid">
+    <div class="card"><div class="label">2026 Goals</div><div class="value">${state.goals.length}</div><div class="note">Total Weight ${state.goals.reduce((a,b)=>a+Number(b.weight||0),0)}%</div></div>
+    <div class="card"><div class="label">Total Goal Tasks</div><div class="value">${state.details.length}</div><div class="note">Live from Supabase</div></div>
+    <div class="card"><div class="label">Pending Items</div><div class="value">${pending}</div><div class="note">Needs follow-up</div></div>
+    <div class="card"><div class="label">High Priority Actions</div><div class="value">${high}</div><div class="note">Immediate control</div></div>
+  </div>
+  <div class="panel"><div class="actions"><button class="btn" onclick="loadAll()">Refresh Database</button><button class="btn gray" onclick="exportCSV('details')">Export Goal Details</button><button class="btn gray" onclick="exportCSV('actions')">Export Actions</button></div></div>
+  <div class="grid" style="grid-template-columns:1fr 1fr"><div class="panel"><h3>Goal Weight Distribution</h3><canvas id="weightChart"></canvas></div><div class="panel"><h3>Status Snapshot</h3><canvas id="statusChart"></canvas></div></div>`
+}
+
+function goalHTML(no){
+ const g=state.goals.find(x=>Number(x.goal_no)===no)||{};
+ const rows=state.details.filter(x=>Number(x.goal_no)===no);
+ const evid=state.evidence.filter(x=>Number(x.goal_no)===no);
+ return `<div class="panel"><h2>G${no} — ${esc(g.goal_title||goalNames[no])}</h2><p class="muted">Strategic Objective: ${esc(g.strategic_objective||'')}</p>
+ <div class="grid"><div class="card"><div class="label">Weight</div><div class="value">${esc(g.weight||0)}%</div></div><div class="card"><div class="label">Tasks</div><div class="value">${rows.length}</div></div><div class="card"><div class="label">Evidence</div><div class="value">${evid.length}</div></div><div class="card"><div class="label">Progress</div><div class="value">${Math.round(avg(rows.map(r=>r.progress)))}%</div></div></div>
+ <div class="actions"><button class="btn" onclick="openGoalEdit(${no})">Edit Goal</button><button class="btn green" onclick="openTaskAdd(${no})">Add KPI / Task</button><button class="btn" onclick="openEvidenceAdd(${no})">Upload Evidence</button><button class="btn gray" onclick="loadAll()">Refresh</button></div></div>
+ <div class="panel"><h3>G${no} Tasks / KPIs</h3>${detailsTable(rows)}</div>
+ <div class="panel"><h3>G${no} Evidence Library</h3>${evidenceTable(evid)}</div>`
+}
+function avg(arr){let nums=arr.map(Number).filter(n=>!isNaN(n));return nums.length?nums.reduce((a,b)=>a+b,0)/nums.length:0}
+function detailsTable(rows){return `<div class="table-wrap"><table><thead><tr><th>Task</th><th>Owner</th><th>Quarter</th><th>Status</th><th>Progress</th><th>Priority</th><th>Control</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.task_name)}</td><td>${esc(r.owner)}</td><td>${esc(r.quarter)}</td><td>${badge(r.status)}</td><td>${progress(r.progress)}</td><td>${badge(r.task_priority||r.priority)}</td><td><div class="actions"><button class="btn small" onclick='openTaskEdit(${JSON.stringify(r.id)})'>Edit</button><button class="btn small red" onclick="deleteRow('details',${r.id})">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="7">No records.</td></tr>'}</tbody></table></div>`}
+function evidenceTable(rows){return `<div class="table-wrap"><table><thead><tr><th>Title</th><th>Type</th><th>Task</th><th>Submitted By</th><th>Date</th><th>Attachment</th><th>Control</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.evidence_title)}</td><td>${esc(r.evidence_type)}</td><td>${esc(r.task_name)}</td><td>${esc(r.submitted_by)}</td><td>${esc(r.submission_date||'')}</td><td>${r.file_link?`<a href="${esc(r.file_link)}" target="_blank">Open</a>`:'-'}</td><td><div class="actions"><button class="btn small" onclick="openEvidenceEdit(${r.id})">Edit</button><button class="btn small red" onclick="deleteRow('evidence',${r.id})">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="7">No evidence records.</td></tr>'}</tbody></table></div>`}
+
+function actionsHTML(){return `<div class="panel"><h2>Executive Actions — Full Control</h2><div class="form-grid"><input id="a_title" placeholder="Action title"><input id="a_owner" placeholder="Owner"><select id="a_priority"><option>High</option><option>Medium</option><option>Low</option></select><button class="btn" onclick="addAction()">Add Action</button></div></div><div class="panel"><h3>Action Register</h3>${actionsTable(state.actions)}</div>`}
+function actionsTable(rows){return `<div class="table-wrap"><table><thead><tr><th>Action</th><th>Owner</th><th>Priority</th><th>Status</th><th>Target</th><th>Control</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.action||r.action_title)}</td><td>${esc(r.owner)}</td><td>${badge(r.priority)}</td><td>${badge(r.status)}</td><td>${esc(r.target_date||r.target||'')}</td><td><div class="actions"><button class="btn small" onclick="openActionEdit(${r.id})">Edit</button><button class="btn small green" onclick="quickStatus(${r.id},'Completed')">Complete</button><button class="btn small red" onclick="deleteRow('actions',${r.id})">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="6">No actions.</td></tr>'}</tbody></table></div>`}
+function evidenceHTML(){return `<div class="panel"><h2>Evidence Library — Full Control</h2><div class="actions"><button class="btn" onclick="openEvidenceAdd('')">Upload Evidence</button><button class="btn gray" onclick="exportCSV('evidence')">Export Evidence Register</button><button class="btn gray" onclick="loadAll()">Refresh</button></div></div><div class="panel">${evidenceTable(state.evidence)}</div>`}
+function reportHTML(){return `<div class="panel"><h2>Executive Report</h2><div class="actions"><button class="btn" onclick="window.print()">Print / Save PDF</button><button class="btn gray" onclick="exportCSV('goals')">Export Goals</button><button class="btn gray" onclick="exportCSV('details')">Export Details</button><button class="btn gray" onclick="exportCSV('actions')">Export Actions</button></div></div>${dashboardHTML()}<div class="panel"><h3>All Goals Details</h3>${detailsTable(state.details)}</div>`}
+
+async function addAction(){let action=val('a_title'), owner=val('a_owner'), priority=val('a_priority'); if(!action)return alert('Action title required'); const {error}=await db.from(TABLES.actions).insert([{action,owner,priority,status:'Pending',target_date:new Date().toISOString().slice(0,10)}]); if(error)return alert(error.message); await loadAll();}
+async function quickStatus(id,status){await db.from(TABLES.actions).update({status}).eq('id',id); await loadAll();}
+async function deleteRow(type,id){if(!confirm('Delete this record?'))return; const {error}=await db.from(tableName(type)).delete().eq('id',id); if(error)return alert(error.message); await loadAll();}
+
+function openModal(title,html){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=html;document.getElementById('modal').classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function openGoalEdit(no){let r=state.goals.find(x=>Number(x.goal_no)===Number(no))||{};openModal('Edit Goal G'+no,`<div class="form-grid two"><input id="g_title" value="${esc(r.goal_title||goalNames[no])}" placeholder="Goal Title"><input id="g_obj" value="${esc(r.strategic_objective||'')}" placeholder="Strategic Objective"><input id="g_weight" type="number" value="${esc(r.weight||0)}" placeholder="Weight"><input id="g_priority" value="${esc(r.priority||'High')}" placeholder="Priority"></div><button class="btn" onclick="saveGoal(${no},${r.id||'null'})">Save Goal</button>`)}
+async function saveGoal(no,id){let obj={goal_no:no,goal_title:val('g_title'),strategic_objective:val('g_obj'),weight:Number(val('g_weight')||0),priority:val('g_priority')}; let res=id?await db.from(TABLES.goals).update(obj).eq('id',id):await db.from(TABLES.goals).insert([obj]); if(res.error)return alert(res.error.message); closeModal(); await loadAll();}
+function openTaskAdd(no){openTaskForm({goal_no:no},false)}
+function openTaskEdit(id){let r=state.details.find(x=>Number(x.id)===Number(id));openTaskForm(r,true)}
+function openTaskForm(r,edit){openModal(edit?'Edit KPI / Task':'Add KPI / Task',`<div class="form-grid three"><input id="t_goal" type="number" value="${esc(r.goal_no||'')}" placeholder="Goal No"><input id="t_name" value="${esc(r.task_name||'')}" placeholder="Task Name"><input id="t_owner" value="${esc(r.owner||'Mahmoud Sharaf')}" placeholder="Owner"><input id="t_quarter" value="${esc(r.quarter||'Q1–Q4')}" placeholder="Quarter"><select id="t_status"><option ${r.status==='Pending'?'selected':''}>Pending</option><option ${r.status==='In Progress'?'selected':''}>In Progress</option><option ${r.status==='Completed'?'selected':''}>Completed</option><option ${r.status==='On Hold'?'selected':''}>On Hold</option></select><input id="t_progress" type="number" value="${esc(r.progress||0)}" placeholder="Progress"><select id="t_priority"><option ${r.task_priority==='High'?'selected':''}>High</option><option ${r.task_priority==='Medium'?'selected':''}>Medium</option><option ${r.task_priority==='Low'?'selected':''}>Low</option></select><textarea id="t_remarks" placeholder="Remarks">${esc(r.remarks||'')}</textarea></div><button class="btn" onclick="saveTask(${edit?r.id:'null'})">Save Task</button>`)}
+async function saveTask(id){let obj={goal_no:Number(val('t_goal')),goal_title:goalNames[Number(val('t_goal'))]||'',task_name:val('t_name'),owner:val('t_owner'),quarter:val('t_quarter'),status:val('t_status'),progress:Number(val('t_progress')||0),task_priority:val('t_priority'),remarks:val('t_remarks')}; let res=id?await db.from(TABLES.details).update(obj).eq('id',id):await db.from(TABLES.details).insert([obj]); if(res.error)return alert(res.error.message); closeModal(); await loadAll();}
+function openActionEdit(id){let r=state.actions.find(x=>Number(x.id)===Number(id));openModal('Edit Action',`<div class="form-grid three"><input id="ea_action" value="${esc(r.action||r.action_title||'')}" placeholder="Action"><input id="ea_owner" value="${esc(r.owner||'')}" placeholder="Owner"><select id="ea_priority"><option ${r.priority==='High'?'selected':''}>High</option><option ${r.priority==='Medium'?'selected':''}>Medium</option><option ${r.priority==='Low'?'selected':''}>Low</option></select><select id="ea_status"><option ${r.status==='Pending'?'selected':''}>Pending</option><option ${r.status==='In Progress'?'selected':''}>In Progress</option><option ${r.status==='Completed'?'selected':''}>Completed</option><option ${r.status==='On Hold'?'selected':''}>On Hold</option></select><input id="ea_target" type="date" value="${esc(r.target_date||'')}"><textarea id="ea_remarks">${esc(r.remarks||'')}</textarea></div><button class="btn" onclick="saveAction(${id})">Save Action</button>`)}
+async function saveAction(id){let obj={action:val('ea_action'),owner:val('ea_owner'),priority:val('ea_priority'),status:val('ea_status'),target_date:val('ea_target'),remarks:val('ea_remarks')}; let res=await db.from(TABLES.actions).update(obj).eq('id',id); if(res.error)return alert(res.error.message); closeModal(); await loadAll();}
+function openEvidenceAdd(no){openEvidenceForm({goal_no:no},false)}
+function openEvidenceEdit(id){let r=state.evidence.find(x=>Number(x.id)===Number(id));openEvidenceForm(r,true)}
+function openEvidenceForm(r,edit){openModal(edit?'Edit Evidence':'Upload Evidence',`<div class="form-grid two"><input id="ev_goal" type="number" value="${esc(r.goal_no||'')}" placeholder="Goal No"><input id="ev_task" value="${esc(r.task_name||'')}" placeholder="Task Name"><input id="ev_title" value="${esc(r.evidence_title||'')}" placeholder="Evidence Title"><select id="ev_type"><option ${r.evidence_type==='PDF'?'selected':''}>PDF</option><option ${r.evidence_type==='Image'?'selected':''}>Image</option><option ${r.evidence_type==='Email'?'selected':''}>Email</option><option ${r.evidence_type==='Report'?'selected':''}>Report</option><option ${r.evidence_type==='Other'?'selected':''}>Other</option></select><input id="ev_file" type="file"><input id="ev_link" value="${esc(r.file_link||'')}" placeholder="File link / URL"><input id="ev_by" value="${esc(r.submitted_by||'Mahmoud Sharaf')}" placeholder="Submitted By"><input id="ev_date" type="date" value="${esc(r.submission_date||new Date().toISOString().slice(0,10))}"><textarea id="ev_remarks">${esc(r.remarks||'')}</textarea></div><button class="btn" onclick="saveEvidence(${edit?r.id:'null'})">Save Evidence</button>`)}
+async function saveEvidence(id){let link=val('ev_link');let file=document.getElementById('ev_file').files[0]; if(file){try{let name=`${Date.now()}_${file.name}`;let up=await db.storage.from('hse-evidence').upload(name,file,{upsert:true});if(up.error) throw up.error;let pub=db.storage.from('hse-evidence').getPublicUrl(name);link=pub.data.publicUrl;}catch(e){alert('Upload failed. Save link manually or create public bucket hse-evidence. '+e.message)}} let goalNo=Number(val('ev_goal'));let obj={goal_no:goalNo,task_name:val('ev_task'),evidence_title:val('ev_title'),evidence_type:val('ev_type'),file_link:link,submitted_by:val('ev_by'),submission_date:val('ev_date'),remarks:val('ev_remarks')}; let res=id?await db.from(TABLES.evidence).update(obj).eq('id',id):await db.from(TABLES.evidence).insert([obj]); if(res.error)return alert(res.error.message); closeModal(); await loadAll();}
+
+function exportCSV(type){let data=state[type]||[];if(!data.length)return alert('No data to export');let cols=[...new Set(data.flatMap(o=>Object.keys(o)))];let csv=[cols.join(',')].concat(data.map(r=>cols.map(c=>`"${String(r[c]??'').replace(/"/g,'""')}"`).join(','))).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`${type}_${new Date().toISOString().slice(0,10)}.csv`;a.click();}
+function drawCharts(){let w=document.getElementById('weightChart'); if(w){new Chart(w,{type:'doughnut',data:{labels:state.goals.map(g=>'G'+g.goal_no),datasets:[{data:state.goals.map(g=>Number(g.weight||0))}]},options:{plugins:{legend:{position:'bottom'}}}})} let s=document.getElementById('statusChart'); if(s){let all=[...state.actions,...state.details];let labels=['Pending','In Progress','Completed','On Hold'];new Chart(s,{type:'bar',data:{labels,datasets:[{label:'Items',data:labels.map(l=>all.filter(x=>String(x.status||'').toLowerCase()===l.toLowerCase()).length)}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}})}}
+
+initNav();loadAll();
+</script>
+</body>
+</html>
